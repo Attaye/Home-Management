@@ -1,0 +1,358 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ReadingDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">dao</a>
+</div>
+
+<h1>Coverage Summary for Class: ReadingDao (dao)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ReadingDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (27/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97%
+  </span>
+  <span class="absValue">
+    (96/99)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package dao;
+&nbsp;
+&nbsp;import databaseconnection.MariaDbConnection;
+&nbsp;import model.KindOfMeter;
+&nbsp;import model.Reading;
+&nbsp;import java.sql.Connection;
+&nbsp;import java.sql.Date;
+&nbsp;import java.sql.PreparedStatement;
+&nbsp;import java.sql.ResultSet;
+&nbsp;import java.sql.SQLException;
+&nbsp;import java.sql.Types;
+&nbsp;import java.text.NumberFormat;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Locale;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;/** Data Access Object for Reading entity. */
+&nbsp;public class ReadingDao {
+&nbsp;
+&nbsp;  /** Database connection. */
+&nbsp;  private final Connection connection;
+&nbsp;
+&nbsp;  /** Formatted date string. */
+&nbsp;  private String formattedDate;
+&nbsp;
+<b class="fc">&nbsp;  private int idcreate = 1;</b>
+<b class="fc">&nbsp;  private int DateOfReadingCreate = 2;</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Constructs a ReadingDao with the given database connection.
+&nbsp;   *
+&nbsp;   * @param db the MariaDbConnection to use
+&nbsp;   */
+<b class="fc">&nbsp;  public ReadingDao(final MariaDbConnection db) {</b>
+<b class="fc">&nbsp;    this.connection = db.getConnection();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Adds a new reading into the reading table.
+&nbsp;   *
+&nbsp;   * @param r the Reading object to insert
+&nbsp;   * @return
+&nbsp;   */
+&nbsp;  public boolean create(final Reading r) {
+&nbsp;    // Prüfen, ob Reading schon existiert
+<b class="fc">&nbsp;    if (exists(r.getId())) {</b>
+<b class="fc">&nbsp;      System.out.println(&quot;The Reading already exist: &quot; + r.getId());</b>
+<b class="fc">&nbsp;      return false;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    final String sql =</b>
+&nbsp;            &quot;INSERT INTO reading (id, date_of_reading, meter_count, meter_id, &quot;
+&nbsp;                    + &quot;comment, kind_of_meter, customer_id) VALUES (?, ?, ?, ?, ?, ?, ?)&quot;;
+<b class="fc">&nbsp;    try (PreparedStatement ps = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;      ps.setString(1, r.getId().toString());</b>
+<b class="pc">&nbsp;      if (r.getDateOfReading() != null) {</b>
+<b class="fc">&nbsp;        ps.setDate(2, Date.valueOf(r.getDateOfReading()));</b>
+&nbsp;      } else {
+<b class="nc">&nbsp;        ps.setNull(2, Types.DATE);</b>
+&nbsp;      }
+<b class="fc">&nbsp;      ps.setDouble(3, r.getMeterCount());</b>
+<b class="pc">&nbsp;      ps.setString(4, r.getMeterId() == null ? &quot;null&quot; : r.getMeterId());</b>
+<b class="pc">&nbsp;      ps.setString(5, r.getComment() == null ? &quot;null&quot; : r.getComment());</b>
+<b class="pc">&nbsp;      ps.setString(6, r.getKindOfMeter() == null ? &quot;UNBEKANNT&quot; : r.getKindOfMeter().name());</b>
+<b class="pc">&nbsp;      ps.setString(7, r.getCustomerId() != null ? r.getCustomerId().toString() : null);</b>
+<b class="fc">&nbsp;      ps.executeUpdate();</b>
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Error inserting reading: &quot; + e.getMessage());</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+<b class="fc">&nbsp;      return false;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return true;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Updates the reading table with the given reading.
+&nbsp;   *
+&nbsp;   * @param reading the Reading object to update
+&nbsp;   */
+&nbsp;  public void update(final Reading reading) {
+<b class="fc">&nbsp;    if (!exists(reading.getId())) {</b>
+<b class="fc">&nbsp;      System.out.println(&quot;Could not find reading with id: &quot; + reading.getId());</b>
+&nbsp;      return;
+&nbsp;    }
+<b class="fc">&nbsp;    final String sql =</b>
+&nbsp;        &quot;UPDATE reading SET date_of_reading=?, meter_count=?,&quot;
+&nbsp;            + &quot; meter_id=?, &quot;
+&nbsp;            + &quot;comment=?, kind_of_meter=?, &quot;
+&nbsp;            + &quot;customer_id=? WHERE id=?&quot;;
+<b class="fc">&nbsp;    try (PreparedStatement st = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;      st.setDate(1, Date.valueOf(reading.getDateOfReading()));</b>
+<b class="fc">&nbsp;      st.setDouble(2, reading.getMeterCount());</b>
+<b class="fc">&nbsp;      st.setString(3, reading.getMeterId());</b>
+<b class="fc">&nbsp;      st.setString(4, reading.getComment());</b>
+<b class="pc">&nbsp;      st.setString(5, reading.getKindOfMeter() == null ? &quot;null&quot; : reading.getKindOfMeter().name());</b>
+&nbsp;
+<b class="pc">&nbsp;      if (reading.getCustomerId() != null) {</b>
+<b class="fc">&nbsp;        st.setString(6, String.valueOf(reading.getCustomerId()));</b>
+&nbsp;      } else {
+<b class="nc">&nbsp;        st.setNull(6, Types.VARCHAR);</b>
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      st.setString(7, reading.getId().toString());</b>
+<b class="fc">&nbsp;      st.executeUpdate();</b>
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Error updating reading: &quot; + reading.getId());</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Deletes a reading from the reading table.
+&nbsp;   *
+&nbsp;   * @param reading the Reading object to delete
+&nbsp;   */
+&nbsp;  public void delete(final Reading reading) {
+<b class="fc">&nbsp;    if (!exists(reading.getId())) {</b>
+<b class="fc">&nbsp;      System.out.println(&quot;Reading ID not found: &quot; + reading.getId());</b>
+&nbsp;      return;
+&nbsp;    }
+<b class="fc">&nbsp;    final String sql = &quot;DELETE FROM reading WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;    try (PreparedStatement st = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;      st.setString(1, reading.getId().toString());</b>
+<b class="fc">&nbsp;      final int deleted = st.executeUpdate();</b>
+<b class="pc">&nbsp;      if (deleted &gt; 0) {</b>
+<b class="fc">&nbsp;        System.out.println(&quot;Reading successfully deleted.&quot;);</b>
+&nbsp;      } else {
+<b class="nc">&nbsp;        System.out.println(&quot;No reading found with ID: &quot; + reading.getId());</b>
+&nbsp;      }
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Error deleting reading: &quot; + reading.getId());</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Finds a reading by its ID.
+&nbsp;   *
+&nbsp;   * @param id the UUID of the reading
+&nbsp;   * @return an Optional containing the Reading if found
+&nbsp;   */
+&nbsp;  public Iterable&lt;Reading&gt; findById(final UUID id) {
+<b class="fc">&nbsp;    final List&lt;Reading&gt; readings = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    final String sql = &quot;SELECT * FROM reading WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;    try (PreparedStatement st = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;      st.setString(1, id.toString());</b>
+<b class="fc">&nbsp;      try (ResultSet rs = st.executeQuery()) {</b>
+<b class="fc">&nbsp;        if (rs.next()) {</b>
+<b class="fc">&nbsp;          final Reading reading = new Reading();</b>
+<b class="fc">&nbsp;          reading.setId(UUID.fromString(rs.getString(&quot;id&quot;)));</b>
+<b class="fc">&nbsp;          reading.setDateOfReading(rs.getDate(&quot;date_of_reading&quot;).toLocalDate());</b>
+<b class="fc">&nbsp;          reading.setMeterCount(rs.getDouble(&quot;meter_count&quot;));</b>
+<b class="fc">&nbsp;          reading.setMeterId(rs.getString(&quot;meter_id&quot;));</b>
+<b class="fc">&nbsp;          reading.setComment(rs.getString(&quot;comment&quot;));</b>
+<b class="fc">&nbsp;          reading.setKindOfMeter(KindOfMeter.valueOf(rs.getString(&quot;kind_of_meter&quot;)));</b>
+<b class="fc">&nbsp;          readings.add(reading);</b>
+&nbsp;        }
+&nbsp;      }
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Could not find reading with ID: &quot; + id);</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return readings;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Retrieves all readings from the reading table.
+&nbsp;   *
+&nbsp;   * @return a list of all Reading objects
+&nbsp;   */
+&nbsp;  public List&lt;Reading&gt; findAll() {
+<b class="fc">&nbsp;    final List&lt;Reading&gt; readings = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    final String sql = &quot;SELECT * FROM reading&quot;;</b>
+<b class="fc">&nbsp;    try (PreparedStatement stmt = connection.prepareStatement(sql);</b>
+<b class="fc">&nbsp;        ResultSet rs = stmt.executeQuery()) {</b>
+<b class="fc">&nbsp;      while (rs.next()) {</b>
+<b class="fc">&nbsp;        final Reading reading = new Reading();</b>
+<b class="fc">&nbsp;        reading.setId(UUID.fromString(rs.getString(&quot;id&quot;)));</b>
+<b class="fc">&nbsp;        final Date sqlDate = rs.getDate(&quot;date_of_reading&quot;);</b>
+<b class="fc">&nbsp;        reading.setDateOfReading(sqlDate != null ? sqlDate.toLocalDate() : null);</b>
+<b class="fc">&nbsp;        reading.setMeterCount(rs.getDouble(&quot;meter_count&quot;));</b>
+<b class="fc">&nbsp;        reading.setMeterId(rs.getString(&quot;meter_id&quot;));</b>
+<b class="fc">&nbsp;        reading.setComment(rs.getString(&quot;comment&quot;));</b>
+<b class="fc">&nbsp;        reading.setKindOfMeter(KindOfMeter.valueOf(rs.getString(&quot;kind_of_meter&quot;)));</b>
+<b class="fc">&nbsp;        readings.add(reading);</b>
+&nbsp;      }
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Error retrieving readings.&quot;);</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return readings;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Checks if a reading with the given ID exists.
+&nbsp;   *
+&nbsp;   * @param id the UUID to check
+&nbsp;   * @return true if the reading exists, false otherwise
+&nbsp;   */
+&nbsp;  public boolean exists(final UUID id) {
+<b class="fc">&nbsp;    final String sql = &quot;SELECT COUNT(*) FROM reading WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;    try (PreparedStatement ps = connection.prepareStatement(sql)) {</b>
+<b class="fc">&nbsp;      ps.setString(1, id.toString());</b>
+<b class="fc">&nbsp;      try (ResultSet rs = ps.executeQuery()) {</b>
+<b class="fc">&nbsp;        if (rs.next()) {</b>
+<b class="pc">&nbsp;          return rs.getInt(1) &gt; 0;</b>
+&nbsp;        }
+&nbsp;      }
+&nbsp;    } catch (SQLException e) {
+<b class="fc">&nbsp;      System.err.println(&quot;Error checking existence of reading: &quot; + id);</b>
+<b class="fc">&nbsp;      e.printStackTrace();</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return false;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Safely returns a trimmed value or &quot;null&quot; if empty.
+&nbsp;   *
+&nbsp;   * @param value the input string
+&nbsp;   * @return the trimmed string or &quot;null&quot;
+&nbsp;   */
+&nbsp;  String safeValue(final String value) {
+<b class="fc">&nbsp;    if (value == null || value.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;      return &quot;null&quot;;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    return value.trim();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Formats a number in German style.
+&nbsp;   *
+&nbsp;   * @param number the number to format
+&nbsp;   * @return the formatted string
+&nbsp;   */
+&nbsp;  public static String formatGermanStyle(final double number) {
+<b class="fc">&nbsp;    final NumberFormat nf = NumberFormat.getInstance(Locale.GERMANY);</b>
+<b class="fc">&nbsp;    nf.setMinimumFractionDigits(2);</b>
+<b class="fc">&nbsp;    return nf.format(number);</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-05 13:37</div>
+</div>
+</body>
+</html>

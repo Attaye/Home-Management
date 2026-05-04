@@ -1,0 +1,24 @@
+<h2>Kundenliste</h2>
+
+<div *ngIf="loading">Lade Daten...</div>
+
+<table *ngIf="!loading">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Vorname</th>
+    <th>Nachname</th>
+    <th>Geschlecht</th>
+    <th>Geburtstag</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let c of customers">
+    <td>{{ c.id }}</td>
+    <td>{{ c.firstName }}</td>
+    <td>{{ c.lastName }}</td>
+    <td>{{ c.gender }}</td>
+    <td>{{ c.dateOfBirth }}</td>
+  </tr>
+  </tbody>
+</table>

@@ -1,0 +1,195 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > DataConverter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">util</a>
+</div>
+
+<h1>Coverage Summary for Class: DataConverter (util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DataConverter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (10/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (17/20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package util;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.format.DateTimeFormatter;
+&nbsp;import model.Gender;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility class for converting data formats such as gender, date, and numbers.
+&nbsp; */
+&nbsp;public final class DataConverter {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Formatter for German date format (dd.MM.yyyy).
+&nbsp;     */
+<b class="fc">&nbsp;    private static final DateTimeFormatter GERMAN_DATE =</b>
+<b class="fc">&nbsp;            DateTimeFormatter.ofPattern(&quot;dd.MM.yyyy&quot;);</b>
+&nbsp;
+&nbsp;    // Private constructor to prevent instantiation
+<b class="nc">&nbsp;    private DataConverter() {</b>
+<b class="nc">&nbsp;        throw new UnsupportedOperationException(&quot;Utility class&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Maps a salutation string to a Gender enum.
+&nbsp;     *
+&nbsp;     * @param salutation the salutation string
+&nbsp;     * @return the corresponding Gender
+&nbsp;     */
+&nbsp;    public static Gender mapGender(final String salutation) {
+<b class="fc">&nbsp;        if (salutation == null) {</b>
+<b class="fc">&nbsp;            return Gender.U;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        return switch (salutation.trim().toLowerCase()) {</b>
+<b class="fc">&nbsp;            case &quot;herr&quot; -&gt; Gender.M;</b>
+<b class="fc">&nbsp;            case &quot;frau&quot; -&gt; Gender.W;</b>
+<b class="nc">&nbsp;            case &quot;k.a.&quot; -&gt; Gender.D;</b>
+<b class="fc">&nbsp;            default -&gt; Gender.U;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses a date string in German format.
+&nbsp;     *
+&nbsp;     * @param date the date string
+&nbsp;     * @return the parsed LocalDate
+&nbsp;     */
+&nbsp;    public static LocalDate parseDate(final String date) {
+<b class="fc">&nbsp;        return LocalDate.parse(date, GERMAN_DATE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses a German-formatted date string,
+&nbsp;     * returning null if input is empty or null.
+&nbsp;     *
+&nbsp;     * @param d the date string
+&nbsp;     * @return the parsed LocalDate or null
+&nbsp;     */
+&nbsp;    public static LocalDate parseGermanDate(final String d) {
+<b class="fc">&nbsp;        if (d == null || d.trim().isEmpty()) {</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return LocalDate.parse(d.trim(), GERMAN_DATE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Parses a localized number string (e.g., &quot;1.234,56&quot;) into a double.
+&nbsp;     *
+&nbsp;     * @param raw the raw number string
+&nbsp;     * @return the parsed double value
+&nbsp;     */
+&nbsp;    public static double parseNumber(final String raw) {
+<b class="fc">&nbsp;        if (raw == null) {</b>
+<b class="fc">&nbsp;            return 0d;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        String s = raw.trim();</b>
+<b class="fc">&nbsp;        s = s.replace(&quot;.&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;.&quot;);</b>
+<b class="fc">&nbsp;        return Double.parseDouble(s);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-05 13:37</div>
+</div>
+</body>
+</html>
