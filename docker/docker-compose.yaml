@@ -1,6 +1,7 @@
 name: "ITP"
-version: "3.9"
+
 services:
+
   mariadb:
     image: mariadb:11.4
     container_name: mariadb-itp-projekt
@@ -15,11 +16,23 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
-      - mariadb_network
+      - itp_mariadb_network
 
+  frontend:
+    build:
+      context: ../home-management
+      dockerfile: Dockerfile
+    container_name: itp-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - itp_mariadb_network
+
+# ── Volumes und Networks auf oberster Ebene (NICHT unter services!) ────────
 volumes:
   mariadb_data:
 
 networks:
-  mariadb_network:
+  itp_mariadb_network:
     driver: bridge

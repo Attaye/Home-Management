@@ -1,242 +1,355 @@
-# 📘 Meter Reading Backend – Java, Javalin & MariaDB
+# ITP Projekt – Digitale Hausverwaltung
 
-Dieses Backend implementiert ein REST‑API zur Verwaltung von Zählerständen (Readings) für Kunden.  
-Es wurde mit **Java**, **Javalin** und **MariaDB** entwickelt und unterstützt vollständige CRUD‑Operationen sowie eine flexible Filter‑Abfrage.
-
----
-
-## 🚀 Technologien
-
-- **Java 17**
-- **Javalin** (leichtgewichtiges Webframework)
-- **MariaDB** / MySQL
-- **JDBC**
-- **Maven**
+**Autor:** Attaye Mustafa  
+**Ausbildung:** Fachinformatiker Anwendungsentwicklung  
+**Zeitraum:** 2025/2026  
+**Projekttyp:** ITP-Abschlussprojekt
 
 ---
 
-## 📂 Projektstruktur
+## Inhaltsverzeichnis
 
+1. [Projektübersicht](#1-projektübersicht)
+2. [Systemanforderungen](#2-systemanforderungen)
+3. [Installation & Start](#3-installation--start)
+4. [Softwarearchitektur](#4-softwarearchitektur)
+5. [Datenbankschema](#5-datenbankschema)
+6. [REST-API Endpunkte](#6-rest-api-endpunkte)
+7. [Funktionen der GUI](#7-funktionen-der-gui)
+8. [Import & Export](#8-import--export)
+9. [Authentifizierung](#9-authentifizierung)
+
+---
+
+## 1. Projektübersicht
+
+Die **Digitale Hausverwaltung** ist eine Webanwendung zur Verwaltung von Kunden und deren Zählerablesungen (Strom, Wasser, Heizung). Sie ersetzt die manuelle, papierbasierte Erfassung durch ein zentrales digitales System.
+
+**Kernfunktionen:**
+- Kunden und Ablesungen anlegen, bearbeiten, löschen und filtern
+- Grafische Auswertung der Messdaten (Charts)
+- Import und Export von Daten in JSON, CSV, XML und PDF
+- Benutzeranmeldung mit Rollenverwaltung (Admin / User)
+
+---
+
+## 2. Systemanforderungen
+
+| Komponente | Version |
+|---|---|
+| Java (JDK) | 21+ |
+| Maven | 3.8+ |
+| Node.js | 18+ |
+| Angular CLI | 17+ |
+| MariaDB | 10.6+ |
+| Docker (optional) | 24+ |
+
+---
+
+## 3. Installation & Start
+
+### 3.1 Datenbank starten (Docker)
+
+```bash
+cd docker
+docker-compose up -d
+```
+
+Die Datenbank ist erreichbar unter:
+- **Host:** `localhost:3306`
+- **Datenbank:** `itp-datenbank`
+- **Benutzer:** `admin`
+- **Passwort:** `itpmariadb2025`
+
+### 3.2 Backend starten
+
+```bash
+# Im Projektverzeichnis (wo pom.xml liegt)
+mvn clean install
+mvn exec:java -Dexec.mainClass="vorlage.App"
+```
+
+Der Server startet auf **http://localhost:8080**
+
+Beim ersten Start werden automatisch:
+- Alle Tabellen angelegt (`customer`, `reading`, `users`)
+- Ein Standard-Admin angelegt: **admin / admin123**
+
+### 3.3 Frontend starten
+
+```bash
+cd home-management
+npm install
+ng serve
+```
+
+Die Anwendung ist erreichbar unter **http://localhost:4200**
+
+### 3.4 Erster Login
+
+| Feld | Wert |
+|---|---|
+| Benutzername | `admin` |
+| Passwort | `admin123` |
+
+---
+
+## 4. Softwarearchitektur
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    FRONTEND (Angular 17)                 │
+│  ┌──────────┐ ┌──────────┐ ┌───────────┐ ┌──────────┐  │
+│  │Dashboard │ │ Kunden   │ │Ablesungen │ │ Reports  │  │
+│  └──────────┘ └──────────┘ └───────────┘ └──────────┘  │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │         HTTP + Bearer Token (AuthInterceptor)    │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────────┬───────────────────────────────────┘
+                      │ REST API (JSON)
+                      │ http://localhost:8080
+┌─────────────────────▼───────────────────────────────────┐
+│                    BACKEND (Javalin + JDBC)              │
+│  ┌─────────────┐ ┌──────────────┐ ┌──────────────────┐  │
+│  │CustomerCtrl │ │ ReadingCtrl  │ │   AuthController  │  │
+│  └─────────────┘ └──────────────┘ └──────────────────┘  │
+│  ┌─────────────┐ ┌──────────────┐ ┌──────────────────┐  │
+│  │ImportCtrl   │ │  UserCtrl    │ │  SetupController  │  │
+│  └─────────────┘ └──────────────┘ └──────────────────┘  │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │              JDBC (MariaDbConnection)            │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────────┬───────────────────────────────────┘
+                      │ JDBC
+┌─────────────────────▼───────────────────────────────────┐
+│                   MariaDB (Docker)                       │
+│         customer | reading | users                       │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Paketstruktur Backend
+
+```
 src/main/java/
-│
 ├── controller/
-│   ├── ReadingController.java
-│   ├── CustomerController.java
-│   └── SetupController
+│   ├── AuthController.java       ← Login, Logout, /auth/me
+│   ├── CustomerController.java   ← CRUD Kunden
+│   ├── ReadingController.java    ← CRUD Ablesungen + Filter
+│   ├── ImportController.java     ← PDF/CSV Datei-Import
+│   ├── UserController.java       ← Admin: User anlegen/löschen
+│   └── SetupController.java      ← DB zurücksetzen
 ├── dao/
-│   ├── ReadingDao.java
-│   ├── CustomerDao.java (falls vorhanden)
-│   
-├── databaseconnection/
-│   ├── IdatabaseConnection
-│   └── DatabaseConnection.java
-│
+│   ├── CustomerDao.java          ← JDBC Kunden
+│   ├── ReadingDao.java           ← JDBC Ablesungen
+│   └── UserDao.java              ← JDBC Benutzer
 ├── model/
+│   ├── Customer.java
 │   ├── Reading.java
-│   ├── Customer.java (falls vorhanden)
-│   ├── KindOfMeter.java
+│   ├── User.java
+│   ├── KindOfMeter.java          ← Enum: STROM, WASSER, HEIZUNG
+│   └── Gender.java               ← Enum: M, W, D, U
+├── dto/
+│   ├── CustomerResponse.java
 │   ├── ReadingResponse.java
-│   └── CustomerResponse.java
-│
-├── util/
-│   ├── ValidationUtil.java (optional)
-│   ├── JsonUtil.java (optional)
-│   └── DateUtil.java (optional)
-│
-├── Vorlage
-│   ├── App.java
-│   ├── CustomerMain.java (nur für Customer Dao Test Sprint-1)
-│   ├── ReadingMain.java (nur für Reading Dao Test Sprint-1)
-│   └──  Server.java
+│   ├── LoginRequest.java
+│   └── LoginResponse.java
+├── databaseconnection/
+│   ├── Idatabaseconnection.java
+│   └── MariaDbConnection.java
+└── util/
+    ├── PasswordUtil.java         ← BCrypt Hashing
+    ├── TokenStore.java           ← In-Memory Token-Verwaltung
+    ├── DataConverter.java
+    └── Importedcsvreader.java    ← Sprint-CSV Parser
+```
+
+### Paketstruktur Frontend
+
+```
+src/app/
+├── core/
+│   ├── models/          ← TypeScript Interfaces
+│   ├── services/        ← HTTP-Services (Customer, Reading, Auth)
+│   ├── guards/          ← AuthGuard
+│   └── interceptors/    ← AuthInterceptor (Bearer Token)
+├── features/
+│   ├── auth/            ← Login-Seite
+│   ├── dashboard/       ← Startseite mit Stats
+│   ├── customers/       ← Kunden CRUD
+│   ├── readings/        ← Ablesungen CRUD
+│   ├── auswertung/      ← Charts (Chart.js)
+│   ├── reports/         ← Import & Export
+│   └── admin/           ← Benutzerverwaltung
+└── shared/
+    ├── components/      ← Navbar
+    └── pipes/           ← KindCountPipe
+```
 
 ---
 
-## 🗄️ Datenbankmodell
-
-### Tabelle: `reading`
+## 5. Datenbankschema
 
 ```sql
+-- Kunden
+CREATE TABLE customer (
+    id         CHAR(36)              PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name  VARCHAR(100),
+    gender     ENUM('D','M','W','U'),
+    birth_date DATE
+);
+
+-- Ablesungen
 CREATE TABLE reading (
-  id CHAR(36) PRIMARY KEY,
-  date_of_reading DATE,
-  meter_count DOUBLE,
-  meter_id VARCHAR(100),
-  comment TEXT,
-  kind_of_meter ENUM('HEIZUNG','STROM','WASSER','UNBEKANNT'),
-  customer_id CHAR(36),
-  substitute TINYINT(1),
-  FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE SET NULL
+    id              CHAR(36)     PRIMARY KEY,
+    date_of_reading DATE,
+    meter_count     DOUBLE,
+    meter_id        VARCHAR(100),
+    comment         TEXT,
+    kind_of_meter   ENUM('HEIZUNG','STROM','WASSER','UNBEKANNT'),
+    customer_id     CHAR(36)     NULL,
+    substitute      BOOLEAN,
+    FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE SET NULL
+);
+
+-- Benutzer
+CREATE TABLE users (
+    id       CHAR(36)     NOT NULL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,   -- BCrypt Hash
+    role     VARCHAR(20)  NOT NULL DEFAULT 'USER'
 );
 ```
-### Tabelle: `customer`
 
-``````sql
-CREATE TABLE customer (
-  id CHAR(36) PRIMARY KEY,
-  first_name VARCHAR(100),
-  last_name VARCHAR(100),
-  gender ENUM('D', 'M', 'W', 'U'),
-  birth_date DATE
-);
-``````   
-### Query: `Testen getfilitered von Reading`
-
-``````sql
-SELECT *
-FROM reading
-WHERE customer_id = 'ec617965-88b4-4721-8158-ee36c38e4db3'
-  AND date_of_reading >= '2020-08-20'
-  AND date_of_reading <= '2020-12-31'
-  AND kind_of_meter = "WASSER";
-``````     
+**Beziehungen:**
+- `reading.customer_id` → `customer.id` (n:1, ON DELETE SET NULL)
+- Ein Kunde kann mehrere Ablesungen haben
+- Wird ein Kunde gelöscht, bleiben Ablesungen erhalten (`customer_id = NULL`)
 
 ---
 
-## 📁 controller/
+## 6. REST-API Endpunkte
 
-Die Controller-Schicht enthält alle REST‑Endpoints.  
-Sie ist verantwortlich für:
+**Base URL:** `http://localhost:8080`
 
-- Entgegennahme von HTTP‑Requests
-- Validierung von Parametern
-- Fehlerbehandlung
-- Rückgabe von JSON‑Antworten
-- Aufruf der DAO‑Methoden
+### Authentifizierung
+| Methode | Endpunkt | Beschreibung |
+|---|---|---|
+| POST | `/auth/login` | Anmelden → gibt Token zurück |
+| POST | `/auth/logout` | Abmelden → Token wird gelöscht |
+| GET | `/auth/me` | Eigene Benutzerinfos abrufen |
 
-### **ReadingController.java**
-- POST `/readings`
-- PUT `/readings`
-- GET `/readings/{uuid}`
-- DELETE `/readings/{uuid}`
-- GET `/readings`
-- GET `/readingfiltered`
+### Kunden
+| Methode | Endpunkt | Beschreibung |
+|---|---|---|
+| GET | `/customers` | Alle Kunden abrufen |
+| GET | `/customers/{uuid}` | Einzelnen Kunden abrufen |
+| POST | `/customers` | Neuen Kunden anlegen |
+| PUT | `/customers` | Kunden aktualisieren |
+| DELETE | `/customers/{uuid}` | Kunden löschen |
 
-### **CustomerController.java** 
-- POST `/customers`
-- PUT  `/customers`
-- GET `/customers`
-- GET `/customers/{uuid}`
-- DELETE `/customers/{uuid}`
+### Ablesungen
+| Methode | Endpunkt | Beschreibung |
+|---|---|---|
+| GET | `/readings` | Alle Ablesungen |
+| GET | `/readings/{uuid}` | Einzelne Ablesung |
+| GET | `/readingfiltered` | Gefiltert nach Kunde/Datum/Art |
+| POST | `/readings` | Neue Ablesung anlegen |
+| PUT | `/readings` | Ablesung aktualisieren |
+| DELETE | `/readings/{uuid}` | Ablesung löschen |
 
----
+### Import & Setup
+| Methode | Endpunkt | Beschreibung |
+|---|---|---|
+| POST | `/import` | Datei-Upload (PDF/CSV) |
+| DELETE | `/setupDB` | Datenbank zurücksetzen |
 
-
-
-## 📁 dao/
-
-Die DAO-Schicht (Data Access Objects) ist für den **direkten Datenbankzugriff** zuständig.
-
-### **ReadingDao.java**
-- CRUD‑Operationen für Readings
-- Dynamische Filter‑Query
-- `mapRow()` zur Umwandlung von SQL‑Daten in Java‑Objekte
-
-### **CustomerDao.java**
-- CRUD‑Operationen für Kunden
-- Suche nach Kunden
-- Validierung von Fremdschlüsseln
-
-**Verantwortung:**  
-➡️ Kommunikation mit MariaDB über JDBC
+### Admin
+| Methode | Endpunkt | Beschreibung |
+|---|---|---|
+| POST | `/admin/users` | Neuen Benutzer anlegen |
+| DELETE | `/admin/users/{username}` | Benutzer löschen |
 
 ---
 
-## 📁 databaseconnection/
+## 7. Funktionen der GUI
 
-### **DatabaseConnection.java**
-- Baut die MariaDB‑Verbindung auf
-- Erstellt Tabellen automatisch, falls sie fehlen
-- Stellt eine Singleton‑Connection bereit
-- Verhindert mehrfaches Öffnen der DB‑Verbindung
+### Dashboard
+- Statistik-Kacheln: Anzahl Kunden, Ablesungen, Schätzwerte, aktiv heute
+- Letzte 6 Ablesungen mit Kundennamen
+- Top-5 Kunden nach Ablesungsanzahl (Balkendiagramm)
 
-**Verantwortung:**  
-➡️ Datenbank‑Setup & Connection‑Management
+### Kunden
+- Liste mit Suchfunktion
+- Detailansicht mit allen Ablesungen des Kunden
+- Formular zum Erstellen und Bearbeiten
+- Löschen mit Bestätigung
+
+### Ablesungen
+- Liste mit Filtern: Zählerart (Strom/Wasser/Heizung), Datum von/bis, Kundenname
+- Detailansicht mit Kundeninformation
+- Formular mit Kundenzuordnung, Zählerstand, Schätzwert-Toggle
+
+### Auswertungen
+- **Donut-Chart:** Verteilung der Ablesungen nach Zählerart
+- **Linien-Chart:** Zählerstandsverlauf über Zeit (filterbar)
+- **Balken-Chart:** Top-10 Kunden nach Ablesungsanzahl
+
+### Reports
+- Export als JSON, CSV oder XML
+- Import von JSON, CSV, XML (App-Format) und PDF (Sprint-Format)
+- Import-Historie der aktuellen Sitzung
 
 ---
 
-## 📁 model/
+## 8. Import & Export
 
-Enthält alle Datenmodelle (Entities), die im gesamten Projekt verwendet werden.
+### Export-Formate
 
-### **Reading.java**
-- Repräsentiert einen Zählerstand
-- Wird in Controller, DAO und JSON‑Serialisierung genutzt
-
-### **Customer.java** *(falls vorhanden)*
-- Repräsentiert einen Kunden
-
-### **KindOfMeter.java**
-- Enum: `WASSER`, `STROM`, `HEIZUNG`, `UNBEKANNT`
-
-### **ReadingResponse.java**
-- Wrapper für POST‑Requests
-- Erwartet JSON‑Struktur:
-  ```json
-  { "reading": { ... } }
-  
----
-📄 App.java
-
-- Der Einstiegspunkt des Backends.
-- Verantwortlich für:
-- Starten des Javalin‑Servers
-- Registrieren aller Controller
-- Initialisieren der DAOs
-- Aufbau der Datenbankverbindung
-
-Beispiel:
-
-````java
-public class App {
-public static void main(String[] args) {
-Javalin app = Javalin.create().start(8080);
-
-        DatabaseConnection db = DatabaseConnection.getInstance();
-        ReadingDao readingDao = new ReadingDao(db.getConnection());
-
-        new ReadingController(app, readingDao);
-    }
+**JSON** – Array oder kombiniertes Objekt:
+```json
+{
+  "customers": [{ "id": "...", "firstName": "...", ... }],
+  "readings":  [{ "id": "...", "kindOfMeter": "STROM", ... }]
 }
-````
+```
 
-🧱 Architekturprinzipien
+**CSV** – Mit Sektions-Header:
+```
+# KUNDEN
+id;firstName;lastName;gender;birthDate
 
-Separation of Concerns  
-Jede Schicht hat eine klar definierte Aufgabe.
+# ABLESUNGEN
+id;customerId;dateOfReading;kindOfMeter;meterCount;...
+```
 
-Single Responsibility Principle  
-Jede Klasse macht genau eine Sache.
+**XML** – Validierbar gegen `hausverwaltung.xsd` / `hausverwaltung.dtd`:
+```xml
+<export>
+  <customers><customer>...</customer></customers>
+  <readings><reading>...</reading></readings>
+</export>
+```
 
-Modularität  
-Controller ↔ DAO ↔ Model sind sauber getrennt.
-
-Erweiterbarkeit  
-Neue Endpoints oder Tabellen können leicht ergänzt werden.
-
-Testbarkeit  
-DAO und Controller können separat getestet werden.
-
-🧭 Datenfluss (Request → Response)
-````
-Client → Controller → DAO → MariaDB → DAO → Controller → JSON Response  
-````
-🧪 Beispiel: Filter‑Request
-````
-GET /readingfiltered?customer=UUID&start=2020-08-20&end=2020-12-31&kindOfMeter=WASSER
-````
-✔️ Fazit
-
-Das Projekt ist klar strukturiert, modular aufgebaut und leicht erweiterbar.
-Die Architektur trennt API‑Logik, Datenbankzugriff und Datenmodelle sauber voneinander und bietet eine solide Grundlage für weitere Features.
+### Sprint-PDF Import
+Die Sprint-Datendateien (`heizung.pdf`, `strom.pdf`, `wasser.pdf`) werden mit **Apache PDFBox** eingelesen und direkt in die Datenbank importiert.
 
 ---
-```` code 
-Wenn du möchtest, kann ich dir zusätzlich:
 
-- eine **Architektur‑Grafik (Diagramm)** erstellen
-- eine **Deployment‑Sektion** hinzufügen
-- eine **API‑Dokumentation im Swagger‑Stil** schreiben
-- oder eine **Frontend‑Integration‑Sektion** ergänzen
+## 9. Authentifizierung
 
-Sag einfach Bescheid, Mustafa.
-````
+- Passwörter werden mit **BCrypt** (Cost-Faktor 12) gehasht
+- Nach Login wird ein **UUID-Token** generiert und im Server-Speicher abgelegt
+- Der Token wird im `localStorage` des Browsers gespeichert
+- Jeder HTTP-Request sendet automatisch `Authorization: Bearer <token>`
+- Geschützte Routen werden durch den `AuthGuard` gesichert
+
+**Rollen:**
+| Rolle | Rechte |
+|---|---|
+| `USER` | Alle CRUD-Operationen |
+| `ADMIN` | Zusätzlich: Benutzerverwaltung |
+
+---
+
+*ITP Projekt 2025/2026 – Attaye Mustafa*
