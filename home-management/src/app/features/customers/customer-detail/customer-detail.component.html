@@ -1,0 +1,155 @@
+<div class="fade-in">
+    @if (loading) {
+        <div class="loading-overlay"><div class="spinner"></div><span>Lade Kunde…</span></div>
+    }
+
+    @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+    }
+
+    @if (!loading && customer) {
+        <!-- Header -->
+        <div class="page-header">
+            <div class="page-title">
+                <div class="breadcrumb">Home › <a routerLink="/kunden">Kunden</a> › {{ getFullName() }}</div>
+                <h1>Kundendetail</h1>
+            </div>
+            <div class="page-actions">
+                <!-- ✅ NEU: Ändern und Löschen nur für USER und ADMIN -->
+                @if (authService.canWrite()) {
+                    <a [routerLink]="['/kunden', customer.id, 'bearbeiten']" class="btn btn-secondary">✏ Ändern</a>
+                    <button class="btn btn-danger" (click)="confirmDelete()">🗑 Löschen</button>
+                }
+            </div>
+        </div>
+
+        <!-- Delete confirm -->
+        @if (deleteConfirm) {
+            <div class="alert alert-danger confirm-bar">
+                <span>Soll <strong>{{ getFullName() }}</strong> wirklich gelöscht werden? Die Ablesungen bleiben erhalten.</span>
+                <div class="confirm-actions">
+                    <button class="btn btn-danger btn-sm" (click)="doDelete()">Ja, löschen</button>
+                    <button class="btn btn-ghost btn-sm" (click)="cancelDelete()">Abbrechen</button>
+                </div>
+            </div>
+        }
+
+        <div class="detail-grid">
+
+            <!-- Profile card -->
+            <div class="card profile-card">
+                <div class="profile-header">
+                    <div class="avatar large">{{ getInitials() }}</div>
+                    <div class="profile-info">
+                        <h2>{{ getFullName() }}</h2>
+                        <p class="text-secondary">Kunde seit {{ formatDate(null) }}</p>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-key">Vorname</span>
+                        <span class="info-val">{{ customer.firstName }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Nachname</span>
+                        <span class="info-val">{{ customer.lastName }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Geburtsdatum</span>
+                        <span class="info-val">{{ formatDate(customer.birthDate) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Geschlecht</span>
+                        <span class="info-val">{{ genderLabels[customer.gender] }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">ID</span>
+                        <span class="info-val mono small">{{ customer.id }}</span>
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="meter-summary">
+                    <div class="meter-chip strom">
+                        <span class="meter-dot strom"></span>
+                        Strom: {{ readings | kindCount:'STROM' }}
+                    </div>
+                    <div class="meter-chip wasser">
+                        <span class="meter-dot wasser"></span>
+                        Wasser: {{ readings | kindCount:'WASSER' }}
+                    </div>
+                    <div class="meter-chip heizung">
+                        <span class="meter-dot heizung"></span>
+                        Heizung: {{ readings | kindCount:'HEIZUNG' }}
+                    </div>
+                </div>
+
+                <!-- ✅ NEU: + Neue Ablesung nur für USER und ADMIN -->
+                @if (authService.canWrite()) {
+                    <a [routerLink]="['/ablesungen/neu']" [queryParams]="{ customer: customer.id }"
+                       class="btn btn-primary full-width mt-16">
+                        + Neue Ablesung
+                    </a>
+                }
+            </div>
+
+            <!-- Readings -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Ablesungen ({{ readings.length }})</h2>
+                </div>
+
+                @if (readings.length === 0) {
+                    <div class="empty-state">
+                        <span class="icon">📊</span>
+                        <p>Noch keine Ablesungen für diesen Kunden.</p>
+                    </div>
+                } @else {
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Art</th>
+                                <th>Zählerstand</th>
+                                <th>Schätzung</th>
+                                <th>Kommentar</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @for (r of readings; track r.id) {
+                                    <tr>
+                                        <td class="mono">{{ r.dateOfReading }}</td>
+                                        <td>
+                      <span class="badge" [class]="'badge-' + getMeterClass(r.kindOfMeter)">
+                        <span class="meter-dot" [class]="getMeterClass(r.kindOfMeter)"></span>
+                          {{ kindLabels[r.kindOfMeter] }}
+                      </span>
+                                        </td>
+                                        <td class="mono">{{ formatNumber(r.meterCount) }} {{ kindUnits[r.kindOfMeter] }}</td>
+                                        <td>
+                                            @if (r.substitute) {
+                                                <span class="badge badge-warning">Ja</span>
+                                            } @else {
+                                                <span class="text-muted">Nein</span>
+                                            }
+                                        </td>
+                                        <td class="text-secondary">{{ r.comment ?? '—' }}</td>
+                                        <td>
+                                            <a [routerLink]="['/ablesungen', r.id]" class="btn btn-ghost btn-sm">Ansicht</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

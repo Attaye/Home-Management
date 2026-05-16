@@ -1,0 +1,84 @@
+.form-card { max-width: 760px; }
+
+.form-required-note {
+  font-size: 12px; color: var(--text-muted);
+  margin-bottom: 24px;
+  .req-star { color: var(--danger); font-weight: 700; }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.full-span { grid-column: 1 / -1; }
+.optional  { color: var(--text-muted); font-weight: 400; font-size: 11px; }
+
+.mono-input { font-family: var(--font-mono); }
+
+// Toggle (checkbox)
+.checkbox-row {
+  display: flex; align-items: center;
+}
+
+.toggle-label {
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; user-select: none;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: var(--text-primary) !important;
+}
+
+.toggle-input { display: none; }
+
+.toggle-track {
+  width: 40px; height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  position: relative;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+
+.toggle-thumb {
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px; left: 3px;
+  transition: transform .2s;
+}
+
+.toggle-input:checked ~ .toggle-track {
+  background: var(--accent);
+}
+.toggle-input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(18px);
+}
+
+.toggle-text {
+  display: flex; flex-direction: column;
+  .toggle-hint { font-size: 11px; color: var(--text-muted); }
+}
+
+// Form actions
+.form-actions {
+  display: flex; gap: 10px; align-items: center;
+  .ml-auto { margin-left: auto; }
+}
+
+.error-msg {
+  font-size: 11px; color: var(--danger); margin-top: 2px;
+}
+
+.spinner.small {
+  width: 14px; height: 14px;
+  border-width: 2px;
+  display: inline-block;
+}

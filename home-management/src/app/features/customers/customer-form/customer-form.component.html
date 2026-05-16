@@ -1,0 +1,96 @@
+<div class="fade-in">
+  <div class="page-header">
+    <div class="page-title">
+      <div class="breadcrumb">
+        Home › <a routerLink="/kunden">Kunden</a>
+        @if (isEdit) { › Ändern } @else { › Neu erstellen }
+      </div>
+      <h1>{{ isEdit ? 'Kunden ändern' : 'Neuen Kunden erstellen' }}</h1>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger">⚠ {{ error }}</div>
+  }
+
+  <div class="form-card card">
+    @if (!isEdit) {
+      <div class="form-hint">
+        <span class="hint-icon">ℹ</span>
+        Nach dem Speichern können Ablesungen für diesen Kunden erfasst werden.
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="firstName">Vorname *</label>
+          <input
+            id="firstName"
+            formControlName="firstName"
+            class="form-control"
+            [class.is-invalid]="isInvalid('firstName')"
+            placeholder="Vorname eingeben…"
+          />
+          @if (isInvalid('firstName')) {
+            <span class="error-msg">Vorname ist erforderlich.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Nachname *</label>
+          <input
+            id="lastName"
+            formControlName="lastName"
+            class="form-control"
+            [class.is-invalid]="isInvalid('lastName')"
+            placeholder="Nachname eingeben…"
+          />
+          @if (isInvalid('lastName')) {
+            <span class="error-msg">Nachname ist erforderlich.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="birthDate">Geburtsdatum</label>
+          <input
+            id="birthDate"
+            type="date"
+            formControlName="birthDate"
+            class="form-control"
+          />
+          <span class="hint">Format: TT.MM.JJJJ (optional)</span>
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Geschlecht *</label>
+          <select
+            id="gender"
+            formControlName="gender"
+            class="form-control"
+            [class.is-invalid]="isInvalid('gender')"
+          >
+            <option value="">Auswählen…</option>
+            <option value="M">Männlich</option>
+            <option value="W">Weiblich</option>
+            <option value="D">Divers</option>
+            <option value="U">Unbekannt</option>
+          </select>
+          @if (isInvalid('gender')) {
+            <span class="error-msg">Geschlecht ist erforderlich.</span>
+          }
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          @if (saving) { <span class="spinner small"></span> }
+          {{ isEdit ? 'Änderung speichern' : 'Kunden speichern' }}
+        </button>
+        <a routerLink="/kunden" class="btn btn-secondary">Abbrechen</a>
+      </div>
+    </form>
+  </div>
+</div>

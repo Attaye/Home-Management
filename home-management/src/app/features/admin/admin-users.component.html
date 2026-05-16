@@ -1,0 +1,120 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Benutzerverwaltung</h1>
+            <div class="breadcrumb">Home › Admin › Benutzer</div>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" (click)="showForm = !showForm">
+                {{ showForm ? '✕ Abbrechen' : '+ Neuer Benutzer' }}
+            </button>
+        </div>
+    </div>
+
+    @if (error)   { <div class="alert alert-danger">⚠ {{ error }}</div> }
+    @if (success) { <div class="alert alert-success">{{ success }}</div> }
+
+    <!-- Neuen Benutzer anlegen -->
+    @if (showForm) {
+        <div class="card form-card">
+            <h2 style="margin-bottom:20px;font-size:16px">Neuen Benutzer anlegen</h2>
+            <form [formGroup]="form" (ngSubmit)="createUser()">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Benutzername *</label>
+                        <input formControlName="username" class="form-control"
+                               [class.is-invalid]="isInvalid(form,'username')" placeholder="z.B. mustafa"/>
+                        @if (isInvalid(form,'username')) { <span class="error-msg">Mind. 3 Zeichen.</span> }
+                    </div>
+                    <div class="form-group">
+                        <label>Passwort *</label>
+                        <input type="password" formControlName="password" class="form-control"
+                               [class.is-invalid]="isInvalid(form,'password')" placeholder="Mind. 6 Zeichen"/>
+                        @if (isInvalid(form,'password')) { <span class="error-msg">Mind. 6 Zeichen.</span> }
+                    </div>
+                    <div class="form-group">
+                        <label>Rolle *</label>
+                        <select formControlName="role" ...>
+                            <option value="USER">USER – Normaler Benutzer</option>
+                            <option value="ADMIN">ADMIN – Administrator</option>
+                            <option value="READONLY">READONLY – Nur lesen</option>  <!-- ← NUR DIESE ZEILE -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" [disabled]="saving">
+                        @if (saving) { <span class="spinner small"></span> } Benutzer anlegen
+                    </button>
+                    <button type="button" class="btn btn-secondary" (click)="showForm=false">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- Benutzer-Tabelle -->
+    <div class="card">
+        <div class="card-header"><h2>Alle Benutzer ({{ users.length }})</h2></div>
+
+        @if (loading) {
+            <div class="loading-overlay"><div class="spinner"></div><span>Lade Benutzer…</span></div>
+        } @else if (users.length === 0) {
+            <div class="empty-state"><span class="icon">🔐</span><p>Keine Benutzer gefunden.</p></div>
+        } @else {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Benutzer</th>
+                        <th>Rolle</th>
+                        <th>Aktionen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @for (u of users; track u.id) {
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px">
+                                        <div class="avatar small">{{ u.username.charAt(0).toUpperCase() }}</div>
+                                        <span>{{ u.username }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (u.role === 'ADMIN') {
+                                        <span class="badge badge-admin">👑 ADMIN</span>
+                                    } @else {
+                                        <span class="badge badge-user">👤 USER</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="action-row">
+                                        <button class="btn btn-secondary btn-sm" (click)="startPasswordChange(u.username)">
+                                            🔑 Passwort
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" (click)="deleteUser(u.username)">
+                                            🗑 Löschen
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Passwort-Änderungszeile -->
+                            @if (changingPasswordFor === u.username) {
+                                <tr class="pw-row">
+                                    <td colspan="3">
+                                        <form [formGroup]="pwForm" (ngSubmit)="savePassword(u.username)" class="pw-form">
+                                            <span class="pw-label">Neues Passwort für <strong>{{ u.username }}</strong>:</span>
+                                            <input type="password" formControlName="password" class="form-control pw-input"
+                                                   [class.is-invalid]="isInvalid(pwForm,'password')"
+                                                   placeholder="Mind. 6 Zeichen" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Speichern</button>
+                                            <button type="button" class="btn btn-ghost btn-sm" (click)="cancelPasswordChange()">Abbrechen</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

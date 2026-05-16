@@ -1,0 +1,90 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Kunden</h1>
+            <div class="breadcrumb">Home › Kunden</div>
+        </div>
+        <div class="page-actions">
+            <!-- ✅ NEU: + Erstellen nur für USER und ADMIN sichtbar -->
+            @if (authService.canWrite()) {
+                <a routerLink="/kunden/neu" class="btn btn-primary">+ Erstellen</a>
+            }
+        </div>
+    </div>
+
+    @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+    }
+
+    <div class="card">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                        class="form-control search-input"
+                        type="search"
+                        placeholder="Kunden suchen…"
+                        [(ngModel)]="searchQuery"
+                        (ngModelChange)="applyFilter()"
+                />
+            </div>
+            <span class="total-label">{{ filtered.length }} Kunden</span>
+        </div>
+
+        @if (loading) {
+            <div class="loading-overlay">
+                <div class="spinner"></div>
+                <span>Lade Kunden…</span>
+            </div>
+        } @else if (filtered.length === 0) {
+            <div class="empty-state">
+                <span class="icon">👥</span>
+                <p>{{ searchQuery ? 'Keine Kunden gefunden.' : 'Noch keine Kunden angelegt.' }}</p>
+                <!-- ✅ NEU: "Ersten Kunden erstellen" Link nur für USER und ADMIN -->
+                @if (!searchQuery && authService.canWrite()) {
+                    <a routerLink="/kunden/neu" class="btn btn-primary btn-sm">Ersten Kunden erstellen</a>
+                }
+            </div>
+        } @else {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Vorname</th>
+                        <th>Nachname</th>
+                        <th>Geschlecht</th>
+                        <th>Geburtsdatum</th>
+                        <th>Aktionen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @for (c of filtered; track c.id) {
+                            <tr>
+                                <td>
+                                    <div class="avatar">{{ getInitials(c) }}</div>
+                                </td>
+                                <td class="fw-medium">{{ c.firstName }}</td>
+                                <td class="fw-medium">{{ c.lastName }}</td>
+                                <td>
+                                    <span class="gender-badge">{{ genderLabels[c.gender] }}</span>
+                                </td>
+                                <td class="text-secondary">{{ formatDate(c.birthDate) }}</td>
+                                <td>
+                                    <div class="action-row">
+                                        <a [routerLink]="['/kunden', c.id]" class="btn btn-ghost btn-sm">Ansicht</a>
+                                        <!-- ✅ NEU: Ändern-Button nur für USER und ADMIN -->
+                                        @if (authService.canWrite()) {
+                                            <a [routerLink]="['/kunden', c.id, 'bearbeiten']" class="btn btn-secondary btn-sm">Ändern</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

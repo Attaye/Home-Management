@@ -1,0 +1,24 @@
+.form-card { max-width: 700px; margin-bottom: 20px; }
+
+.form-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px; margin-bottom: 24px;
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.error-msg { font-size: 11px; color: var(--danger); }
+.form-actions { display: flex; gap: 10px; }
+.spinner.small { width: 14px; height: 14px; border-width: 2px; display: inline-block; }
+.avatar.small  { width: 28px; height: 28px; font-size: 11px; }
+.action-row    { display: flex; gap: 6px; }
+
+.badge-admin { background: rgba(167,139,250,.15); color: #a78bfa; }
+.badge-user  { background: rgba(59,130,246,.15);  color: var(--accent); }
+
+.pw-row { background: var(--surface-2); }
+.pw-form {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px 0;
+  .pw-label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .pw-input { width: 200px; }
+}

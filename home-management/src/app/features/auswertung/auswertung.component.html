@@ -1,0 +1,95 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Auswertungen</h1>
+            <div class="breadcrumb">Home › Grafische Auswertungen der Messdaten</div>
+        </div>
+    </div>
+
+    @if (error)   { <div class="alert alert-danger">⚠ {{ error }}</div> }
+    @if (loading) { <div class="loading-overlay"><div class="spinner"></div><span>Lade Daten…</span></div> }
+
+    @if (!loading && !error) {
+
+        <!-- Statistik-Kacheln -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#f59e0b22;color:#f59e0b">⚡</div>
+                <div class="stat-body">
+                    <span class="stat-value">{{ stats.strom }}</span>
+                    <span class="stat-label">Strom-Ablesungen</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#06b6d422;color:#06b6d4">💧</div>
+                <div class="stat-body">
+                    <span class="stat-value">{{ stats.wasser }}</span>
+                    <span class="stat-label">Wasser-Ablesungen</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#ef444422;color:#ef4444">🔥</div>
+                <div class="stat-body">
+                    <span class="stat-value">{{ stats.heizung }}</span>
+                    <span class="stat-label">Heizungs-Ablesungen</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#a78bfa22;color:#a78bfa">📋</div>
+                <div class="stat-body">
+                    <span class="stat-value">{{ stats.schaetzungen }}</span>
+                    <span class="stat-label">Schätzwerte</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter für Verlaufs-Chart -->
+        <div class="card filter-card">
+            <div class="filter-row">
+                <div class="form-group" style="min-width:160px">
+                    <label>Zählerart</label>
+                    <select class="form-control" [(ngModel)]="selectedKind" (change)="onFilterChange()">
+                        <option value="STROM">⚡ Strom</option>
+                        <option value="WASSER">💧 Wasser</option>
+                        <option value="HEIZUNG">🔥 Heizung</option>
+                    </select>
+                </div>
+                <div class="form-group" style="min-width:220px; flex:1">
+                    <label>Kunde (optional)</label>
+                    <select class="form-control" [(ngModel)]="selectedCustomer" (change)="onFilterChange()">
+                        <option value="">Alle Kunden</option>
+                        @for (c of customers; track c.id) {
+                            <option [value]="c.id">{{ getCustomerName(c) }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+
+            <!-- Donut: Verteilung -->
+            <div class="card chart-card">
+                <div class="chart-wrap">
+                    <canvas #chartVerteilung></canvas>
+                </div>
+            </div>
+
+            <!-- Line: Verlauf -->
+            <div class="card chart-card">
+                <div class="chart-wrap">
+                    <canvas #chartVerlauf></canvas>
+                </div>
+            </div>
+
+            <!-- Bar: Top Kunden -->
+            <div class="card chart-card wide">
+                <div class="chart-wrap tall">
+                    <canvas #chartKunden></canvas>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>

@@ -1,0 +1,55 @@
+.detail-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 960px) { grid-template-columns: 1fr; }
+}
+
+.profile-card {
+  .profile-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+    h2 { font-size: 18px; font-weight: 700; }
+    .text-secondary { font-size: 12px; color: var(--text-secondary); }
+  }
+}
+
+.avatar.large  { width: 56px; height: 56px; font-size: 18px; }
+
+.info-list { display: flex; flex-direction: column; gap: 12px; }
+
+.info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 8px;
+  .info-key { font-size: 12px; color: var(--text-muted); min-width: 100px; }
+  .info-val  { font-size: 13px; font-weight: 500; text-align: right; word-break: break-all; }
+}
+
+.mono  { font-family: var(--font-mono); }
+.small { font-size: 11px; }
+.text-muted    { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+
+.meter-summary {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;
+}
+.meter-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  &.strom   { background: rgba(245,158,11,.1); color: var(--strom); }
+  &.wasser  { background: rgba(6,182,212,.1);  color: var(--wasser); }
+  &.heizung { background: rgba(239,68,68,.1);  color: var(--heizung); }
+}
+
+.full-width { width: 100%; justify-content: center; }
+.mt-16 { margin-top: 16px; }
+
+.confirm-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  .confirm-actions { display: flex; gap: 8px; }
+}
+
+.badge-warning { background: rgba(167,139,250,.15); color: #a78bfa; }

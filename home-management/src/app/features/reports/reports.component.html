@@ -1,0 +1,142 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Reports</h1>
+            <div class="breadcrumb">Home › Import &amp; Export</div>
+        </div>
+    </div>
+
+    @if (exportMsg) { <div class="alert alert-success">{{ exportMsg }}</div> }
+    @if (exportErr) { <div class="alert alert-danger">⚠ {{ exportErr }}</div> }
+    @if (importMsg) { <div class="alert alert-success">{{ importMsg }}</div> }
+    @if (importErr) { <div class="alert alert-danger">⚠ {{ importErr }}</div> }
+
+    <!-- ✅ READONLY: nur Hinweis anzeigen, alles andere versteckt -->
+    @if (authService.isReadonly()) {
+        <div class="alert alert-warning">
+            🔒 Sie haben nur Lesezugriff. Diese Seite steht Ihnen nicht zur Verfügung.
+        </div>
+    }
+
+    <!-- ✅ Alles nur für USER und ADMIN -->
+    @if (authService.canWrite()) {
+        <div class="reports-grid">
+
+            <!-- EXPORT -->
+            <div class="card">
+                <div class="card-header"><h2>📤 Daten exportieren</h2></div>
+                <p class="section-desc">Exportiere Kunden- oder Ablesungsdaten als JSON, CSV oder XML.</p>
+                <div class="export-table">
+                    <div class="export-row header-row">
+                        <span>Datentyp</span>
+                        <span>JSON</span>
+                        <span>CSV</span>
+                        <span>XML</span>
+                    </div>
+                    @for (row of exportRows; track row.type) {
+                        <div class="export-row">
+                            <span class="type-label">
+                                <span class="type-icon">{{ row.icon }}</span>{{ row.label }}
+                            </span>
+                            <button class="export-btn json" (click)="exportData(row.type, 'JSON')" [disabled]="exporting">.json</button>
+                            <button class="export-btn csv"  (click)="exportData(row.type, 'CSV')"  [disabled]="exporting">.csv</button>
+                            <button class="export-btn xml"  (click)="exportData(row.type, 'XML')"  [disabled]="exporting">.xml</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- IMPORT -->
+            <div class="card">
+                <div class="card-header"><h2>📥 Daten importieren</h2></div>
+                <p class="section-desc">Importiere Kunden- oder Ablesungsdaten aus einer <strong>JSON</strong>, <strong>CSV</strong> oder <strong>XML</strong> Datei. Die Daten werden direkt in der Datenbank gespeichert.</p>
+                <label
+                        class="drop-zone"
+                        [class.drag-over]="dragOver"
+                        (dragover)="onDragOver($event)"
+                        (dragleave)="onDragLeave()"
+                        (drop)="onDrop($event)"
+                        for="fileInput"
+                >
+                    <div class="drop-icon">
+                        @if (importing) { <div class="spinner"></div> }
+                        @else { <span>↑</span> }
+                    </div>
+                    <span class="drop-title">
+                        @if (importing) { Importiere… {{ importProgress }}% }
+                        @else { Datei hierher ziehen }
+                    </span>
+                    <span class="drop-sub">oder klicken zum Auswählen</span>
+                    <input id="fileInput" type="file" accept=".json,.xml,.csv,.pdf"
+                           (change)="onFileSelect($event)" class="hidden-input" />
+                </label>
+                @if (importing) {
+                    <div class="progress-wrap">
+                        <div class="progress-bar" [style.width.%]="importProgress"></div>
+                    </div>
+                }
+                <div class="format-chips">
+                    <div class="format-chip">
+                        <span class="chip-ext json">JSON</span>
+                        <div class="chip-info"><span>JSON Datei</span><span class="chip-sub">Array oder &#123;customers:[...], readings:[...]&#125;</span></div>
+                    </div>
+                    <div class="format-chip">
+                        <span class="chip-ext csv">CSV</span>
+                        <div class="chip-info"><span>CSV Datei</span><span class="chip-sub">Mit # KUNDEN / # ABLESUNGEN Sektionen</span></div>
+                    </div>
+                    <div class="format-chip">
+                        <span class="chip-ext pdf">PDF</span>
+                        <div class="chip-info"><span>PDF / CSV Datei</span><span class="chip-sub">Sprint-Datendateien (heizung/strom/wasser.pdf)</span></div>
+                    </div>
+                    <div class="format-chip">
+                        <span class="chip-ext xml">XML</span>
+                        <div class="chip-info"><span>XML Datei</span><span class="chip-sub">Format wie beim XML-Export</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="card full-span">
+                <div class="card-header"><h2>Zuletzt importiert</h2></div>
+                @if (history.length === 0) {
+                    <div class="empty-state">
+                        <span class="icon">📁</span>
+                        <p>Noch keine Imports in dieser Sitzung.</p>
+                    </div>
+                } @else {
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr><th>Dateiname</th><th>Datum</th><th>Status</th><th>Ergebnis</th></tr>
+                            </thead>
+                            <tbody>
+                                @for (h of history; track h.name + h.date) {
+                                    <tr>
+                                        <td class="mono">{{ h.name }}</td>
+                                        <td class="mono text-secondary">{{ h.date }}</td>
+                                        <td>
+                                            @if (h.status === 'success') {
+                                                <span class="badge badge-success">✓ Erfolgreich</span>
+                                            } @else {
+                                                <span class="badge badge-danger">✗ Fehler</span>
+                                            }
+                                        </td>
+                                        <td class="text-secondary">{{ h.msg }}</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <!-- DEV TOOLS -->
+            <div class="card dev-card full-span">
+                <div class="card-header"><h2>🛠 Entwickler-Tools</h2></div>
+                <p class="section-desc text-muted">Nur für Testzwecke – löscht alle Daten!</p>
+                <button class="btn btn-danger" (click)="resetDb()">🗑 Datenbank zurücksetzen (DELETE /setupDB)</button>
+            </div>
+
+        </div>
+    }
+</div>

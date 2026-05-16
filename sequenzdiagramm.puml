@@ -1,0 +1,252 @@
+@startuml ITP-Projekt Sequenzdiagramme
+
+skinparam backgroundColor #0d1117
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 8
+skinparam maxMessageSize 160
+skinparam sequenceParticipant underline
+
+skinparam participant {
+    BackgroundColor #161b22
+    BorderColor #2a3040
+    FontColor #e8edf4
+}
+skinparam sequence {
+    ArrowColor #3b82f6
+    LifeLineBorderColor #2a3040
+    LifeLineBackgroundColor #1e2530
+    GroupBackgroundColor #1e2530
+    GroupBorderColor #384050
+    GroupFontColor #e8edf4
+    DividerBackgroundColor #1e2530
+    DividerBorderColor #384050
+}
+skinparam note {
+    BackgroundColor #1e2530
+    BorderColor #3b82f6
+    FontColor #e8edf4
+}
+
+title ITP Projekt – Digitale Hausverwaltung\nUML-Sequenzdiagramme (CRUD-Operationen)
+
+' ═══════════════════════════════════════════════════
+' DIAGRAM 1: CREATE Customer
+' ═══════════════════════════════════════════════════
+
+== 1. CREATE – Neuen Kunden anlegen ==
+
+actor       "Benutzer"          as User
+participant "Angular\nFrontend" as FE
+participant "AuthInterceptor"   as AI
+participant "Javalin\nServer"   as BE
+participant "CustomerController" as CC
+participant "CustomerDao"       as DAO
+database    "MariaDB"           as DB
+
+User  -> FE  : Formular ausfüllen\n+ "Speichern" klicken
+activate FE
+
+FE    -> AI  : POST /customers\n{ customer: {...} }
+activate AI
+AI    -> BE  : + Header: Authorization: Bearer <token>
+activate BE
+
+BE    -> CC  : createCustomer(ctx)
+activate CC
+
+CC    -> CC  : ctx.bodyAsClass(CustomerResponse.class)
+CC    -> CC  : customer.getId() == null?\n→ UUID.randomUUID()
+
+CC    -> DAO : create(customer)
+activate DAO
+DAO   -> DAO : exists(id)? → false
+DAO   -> DB  : INSERT INTO customer\n(id, first_name, last_name, gender, birth_date)
+activate DB
+DB   --> DAO : OK
+deactivate DB
+DAO  --> CC  : true
+deactivate DAO
+
+CC   --> BE  : ctx.status(201).json(customer)
+deactivate CC
+BE   --> AI  : HTTP 201\n{ id, firstName, ... }
+deactivate BE
+AI   --> FE  : Response
+deactivate AI
+
+FE    -> FE  : router.navigate(['/kunden', id])
+FE   --> User : Weiterleitung zur\nKundendetailseite
+deactivate FE
+
+' ═══════════════════════════════════════════════════
+' DIAGRAM 2: READ – Alle Kunden laden
+' ═══════════════════════════════════════════════════
+
+== 2. READ – Alle Kunden laden ==
+
+User  -> FE  : Navigiert zu\n"/kunden"
+activate FE
+
+FE    -> AI  : GET /customers
+activate AI
+AI    -> BE  : + Authorization: Bearer <token>
+activate BE
+
+BE    -> CC  : getAllCustomers(ctx)
+activate CC
+CC    -> DAO : findAll()
+activate DAO
+DAO   -> DB  : SELECT * FROM customer
+activate DB
+DB   --> DAO : ResultSet (Liste aller Kunden)
+deactivate DB
+DAO  --> CC  : List<Customer>
+deactivate DAO
+
+CC    -> CC  : .stream().map(CustomerResponse::new)
+CC   --> BE  : ctx.json(List<CustomerResponse>)
+deactivate CC
+BE   --> AI  : HTTP 200\n[{customer:{...}}, ...]
+deactivate BE
+AI   --> FE  : Response
+deactivate AI
+
+FE    -> FE  : customers = arr.map(item => item.customer)
+FE   --> User : Kundenliste wird\nangezeigt
+deactivate FE
+
+' ═══════════════════════════════════════════════════
+' DIAGRAM 3: UPDATE – Kunden bearbeiten
+' ═══════════════════════════════════════════════════
+
+== 3. UPDATE – Kunden bearbeiten ==
+
+User  -> FE  : Daten ändern +\n"Änderung speichern"
+activate FE
+
+FE    -> AI  : PUT /customers\n{ id, firstName, lastName, ... }
+activate AI
+AI    -> BE  : + Authorization: Bearer <token>
+activate BE
+
+BE    -> CC  : updateCustomer(ctx)
+activate CC
+CC    -> CC  : ctx.bodyAsClass(Customer.class)
+CC    -> DAO : update(customer)
+activate DAO
+DAO   -> DAO : exists(id)? → true
+DAO   -> DB  : UPDATE customer SET\nfirst_name=?, last_name=?,\ngender=?, birth_date=?\nWHERE id=?
+activate DB
+DB   --> DAO : 1 row updated
+deactivate DB
+DAO  --> CC  : true
+deactivate DAO
+
+CC   --> BE  : ctx.status(200)\n.result("Customer updated")
+deactivate CC
+BE   --> AI  : HTTP 200
+deactivate BE
+AI   --> FE  : Response
+deactivate AI
+
+FE    -> FE  : router.navigate(['/kunden', id])
+FE   --> User : Weiterleitung zur\nKundendetailseite
+deactivate FE
+
+' ═══════════════════════════════════════════════════
+' DIAGRAM 4: DELETE – Kunden löschen
+' ═══════════════════════════════════════════════════
+
+== 4. DELETE – Kunden löschen ==
+
+User  -> FE  : "Löschen" klicken\n+ Bestätigung
+activate FE
+
+FE    -> AI  : DELETE /customers/{uuid}
+activate AI
+AI    -> BE  : + Authorization: Bearer <token>
+activate BE
+
+BE    -> CC  : deleteCustomer(ctx)
+activate CC
+CC    -> CC  : UUID.fromString(uuidParam)
+CC    -> DAO : delete(uuid)
+activate DAO
+DAO   -> DB  : DELETE FROM customer\nWHERE id = ?
+activate DB
+
+note over DB : ON DELETE SET NULL:\nAlle reading.customer_id\nwerden auf NULL gesetzt
+DB   --> DAO : 1 row deleted
+deactivate DB
+DAO  --> CC  : true
+deactivate DAO
+
+CC   --> BE  : ctx.status(200)\n.result("Customer deleted")
+deactivate CC
+BE   --> AI  : HTTP 200
+deactivate BE
+AI   --> FE  : Response
+deactivate AI
+
+FE    -> FE  : router.navigate(['/kunden'])
+FE   --> User : Zurück zur Kundenliste
+deactivate FE
+
+' ═══════════════════════════════════════════════════
+' DIAGRAM 5: LOGIN
+' ═══════════════════════════════════════════════════
+
+== 5. LOGIN – Benutzeranmeldung ==
+
+participant "LoginComponent"    as LC
+participant "AuthService"       as AS
+participant "AuthController"    as AC
+participant "UserDao"           as UD
+participant "PasswordUtil"      as PU
+participant "TokenStore"        as TS
+
+User  -> LC  : username + password\neingeben
+activate LC
+
+LC    -> AS  : login({ username, password })
+activate AS
+AS    -> BE  : POST /auth/login\n{ username, password }
+activate BE
+
+BE    -> AC  : login(ctx)
+activate AC
+AC    -> UD  : findByUsername(username)
+activate UD
+UD    -> DB  : SELECT * FROM users\nWHERE LOWER(username)=?
+activate DB
+DB   --> UD  : User { id, username, passwordHash, role }
+deactivate DB
+UD   --> AC  : Optional<User>
+deactivate UD
+
+AC    -> PU  : verify(password, passwordHash)
+activate PU
+PU   --> AC  : true
+deactivate PU
+
+AC    -> TS  : createToken(username)
+activate TS
+TS    -> TS  : UUID.randomUUID()
+TS   --> AC  : token (UUID-String)
+deactivate TS
+
+AC   --> BE  : ctx.json({ token, username, role })
+deactivate AC
+BE   --> AS  : HTTP 200\n{ token, username, role }
+deactivate BE
+
+AS    -> AS  : localStorage.setItem('itp_token', token)
+AS    -> AS  : currentUser.set({ username, role })
+AS   --> LC  : LoginResponse
+deactivate AS
+
+LC    -> LC  : router.navigate(['/dashboard'])
+LC   --> User : Weiterleitung zum\nDashboard
+deactivate LC
+
+@enduml

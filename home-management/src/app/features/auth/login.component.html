@@ -1,0 +1,65 @@
+<div class="login-shell">
+    <div class="login-card">
+
+        <div class="login-logo">
+            <div class="logo-mark">ITP</div>
+            <div class="logo-text">
+                <span class="logo-name">ITP Projekt</span>
+                <span class="logo-sub">Digitale Hausverwaltung</span>
+            </div>
+        </div>
+
+        <h1 class="login-title">Anmelden</h1>
+        <p class="login-desc">Melde dich mit deinen Zugangsdaten an.</p>
+
+        @if (error) {
+            <div class="alert alert-danger">⚠ {{ error }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+            <div class="form-group">
+                <label for="username">Benutzername</label>
+                <input
+                        id="username"
+                        formControlName="username"
+                        class="form-control"
+                        [class.is-invalid]="isInvalid('username')"
+                        placeholder="admin"
+                        autocomplete="username"
+                />
+                @if (isInvalid('username')) {
+                    <span class="error-msg">Benutzername ist erforderlich.</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input
+                        id="password"
+                        type="password"
+                        formControlName="password"
+                        class="form-control"
+                        [class.is-invalid]="isInvalid('password')"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                />
+                @if (isInvalid('password')) {
+                    <span class="error-msg">Passwort ist erforderlich.</span>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-primary login-btn" [disabled]="loading">
+                @if (loading) { <span class="spinner small"></span> }
+                {{ loading ? 'Anmelden…' : 'Anmelden' }}
+            </button>
+        </form>
+
+        <div class="login-hint">
+            Standard-Login: <code>admin</code> / <code>admin123</code>
+        </div>
+    </div>
+
+    <div class="login-footer">
+        ITP Projekt 2025/26 · Attaye Mustafa · Version 1.0
+    </div>
+</div>

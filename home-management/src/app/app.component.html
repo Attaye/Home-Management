@@ -1,0 +1,8 @@
+<div class="shell">
+    @if (showNavbar) {
+        <app-navbar></app-navbar>
+    }
+    <main class="content" [class.full-width]="!showNavbar">
+        <router-outlet></router-outlet>
+    </main>
+</div>

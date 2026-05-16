@@ -1,0 +1,28 @@
+<!-- DTD für ITP Projekt – Hausverwaltung XML Export -->
+
+        <!ELEMENT export (customers?, readings?)>
+
+        <!-- ═══ Kunden ════════════════════════════════════════════════════════════ -->
+        <!ELEMENT customers (customer*)>
+        <!ELEMENT customer  (id, firstName, lastName, gender, birthDate)>
+        <!ELEMENT id        (#PCDATA)>
+        <!ELEMENT firstName (#PCDATA)>
+        <!ELEMENT lastName  (#PCDATA)>
+        <!ELEMENT gender    (#PCDATA)>
+        <!-- gender: M | W | D | U -->
+        <!ELEMENT birthDate (#PCDATA)>
+        <!-- birthDate Format: YYYY-MM-DD -->
+
+        <!-- ═══ Ablesungen ════════════════════════════════════════════════════════ -->
+        <!ELEMENT readings  (reading*)>
+        <!ELEMENT reading   (id, customerId, dateOfReading, kindOfMeter, meterCount, meterId, substitute, comment)>
+        <!ELEMENT customerId    (#PCDATA)>
+        <!ELEMENT dateOfReading (#PCDATA)>
+        <!-- dateOfReading Format: YYYY-MM-DD -->
+        <!ELEMENT kindOfMeter   (#PCDATA)>
+        <!-- kindOfMeter: STROM | WASSER | HEIZUNG | UNBEKANNT -->
+        <!ELEMENT meterCount    (#PCDATA)>
+        <!ELEMENT meterId       (#PCDATA)>
+        <!ELEMENT substitute    (#PCDATA)>
+        <!-- substitute: true | false -->
+        <!ELEMENT comment       (#PCDATA)>

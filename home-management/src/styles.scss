@@ -1,0 +1,239 @@
+/* ─── Global CSS Variables ─────────────────────────────────── */
+:root {
+  --bg:          #0d1117;
+  --surface:     #161b22;
+  --surface-2:   #1e2530;
+  --border:      #2a3040;
+  --border-2:    #384050;
+
+  --text-primary:   #e8edf4;
+  --text-secondary: #8b95a8;
+  --text-muted:     #55616e;
+
+  --accent:      #3b82f6;
+  --accent-dim:  rgba(59,130,246,.15);
+  --accent-hover:#2563eb;
+
+  --strom:  #f59e0b;
+  --wasser: #06b6d4;
+  --heizung:#ef4444;
+  --unknown:#8b95a8;
+
+  --success: #22c55e;
+  --danger:  #ef4444;
+  --warning: #f59e0b;
+
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+
+  --shadow: 0 2px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.5);
+
+  --sidebar-w: 240px;
+  --header-h:  60px;
+
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+/* ─── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: inherit; }
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Utility ───────────────────────────────────────────────── */
+.sr-only {
+  position: absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* ─── Shared Button Styles ──────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; transition: all .15s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent); color: #fff;
+  &:hover { background: var(--accent-hover); }
+}
+.btn-secondary {
+  background: var(--surface-2); color: var(--text-primary);
+  border: 1px solid var(--border);
+  &:hover { background: var(--border); }
+}
+.btn-danger {
+  background: rgba(239,68,68,.15); color: var(--danger);
+  border: 1px solid rgba(239,68,68,.3);
+  &:hover { background: rgba(239,68,68,.25); }
+}
+.btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  &:hover { background: var(--surface-2); color: var(--text-primary); }
+}
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon {
+  padding: 7px; border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-secondary);
+  &:hover { color: var(--text-primary); background: var(--border); }
+}
+
+/* ─── Badge ─────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: .03em;
+}
+.badge-strom   { background: rgba(245,158,11,.15); color: var(--strom); }
+.badge-wasser  { background: rgba(6,182,212,.15);  color: var(--wasser); }
+.badge-heizung { background: rgba(239,68,68,.15);  color: var(--heizung); }
+.badge-unknown { background: rgba(139,149,168,.15);color: var(--unknown); }
+.badge-success { background: rgba(34,197,94,.15);  color: var(--success); }
+.badge-danger  { background: rgba(239,68,68,.15);  color: var(--danger); }
+
+/* ─── Form Elements ─────────────────────────────────────────── */
+.form-group {
+  display: flex; flex-direction: column; gap: 6px;
+  label { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: .04em; text-transform: uppercase; }
+  .hint { font-size: 11px; color: var(--text-muted); }
+}
+.form-control {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 12px;
+  color: var(--text-primary); font-size: 14px; width: 100%;
+  transition: border-color .15s ease;
+  &::placeholder { color: var(--text-muted); }
+  &:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+  &.is-invalid { border-color: var(--danger); }
+}
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b95a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  option { background: var(--surface-2); }
+}
+
+/* ─── Card ───────────────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+  h2 { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+}
+
+/* ─── Table ─────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  th {
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    color: var(--text-primary); font-size: 13px;
+  }
+  tbody tr {
+    transition: background .1s;
+    &:hover { background: var(--surface-2); }
+    &:last-child td { border-bottom: none; }
+  }
+}
+
+/* ─── Empty State ────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 24px; gap: 12px;
+  .icon { font-size: 40px; opacity: .3; }
+  p { color: var(--text-muted); font-size: 14px; }
+}
+
+/* ─── Alert ─────────────────────────────────────────────────── */
+.alert {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; margin-bottom: 16px;
+}
+.alert-danger  { background: rgba(239,68,68,.1); color: var(--danger); border: 1px solid rgba(239,68,68,.2); }
+.alert-success { background: rgba(34,197,94,.1); color: var(--success); border: 1px solid rgba(34,197,94,.2); }
+
+/* ─── Page Layout ────────────────────────────────────────────── */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+  .page-title {
+    h1 { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  }
+  .page-actions { display: flex; gap: 8px; align-items: center; }
+}
+
+/* ─── Loading Spinner ────────────────────────────────────────── */
+.spinner {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border-2);
+  border-top-color: var(--accent);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px; gap: 12px; color: var(--text-secondary);
+}
+
+/* ─── Meter dot indicator ────────────────────────────────────── */
+.meter-dot {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  &.strom   { background: var(--strom); }
+  &.wasser  { background: var(--wasser); }
+  &.heizung { background: var(--heizung); }
+  &.unknown { background: var(--unknown); }
+}
+
+/* ─── Avatar ─────────────────────────────────────────────────── */
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+  background: var(--accent-dim); color: var(--accent);
+}
+
+/* ─── Divider ────────────────────────────────────────────────── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn .25s ease; }

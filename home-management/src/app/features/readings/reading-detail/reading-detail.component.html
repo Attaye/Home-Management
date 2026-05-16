@@ -1,0 +1,128 @@
+<div class="fade-in">
+    @if (loading) {
+        <div class="loading-overlay"><div class="spinner"></div><span>Lade Ablesung…</span></div>
+    }
+    @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+    }
+
+    @if (!loading && reading) {
+        <div class="page-header">
+            <div class="page-title">
+                <div class="breadcrumb">
+                    Home › <a routerLink="/ablesungen">Ablesungen</a>
+                    › {{ reading.dateOfReading }} · {{ getCustomerName() }}
+                </div>
+                <h1>Ablese-Details</h1>
+            </div>
+            <div class="page-actions">
+                <!-- ✅ NEU: Ändern, + Neue Ablesung, Löschen nur für USER und ADMIN -->
+                @if (authService.canWrite()) {
+                    <a [routerLink]="['/ablesungen', reading.id, 'bearbeiten']" class="btn btn-secondary">✏ Ändern</a>
+                    <a routerLink="/ablesungen/neu" class="btn btn-primary">+ Neue Ablesung</a>
+                    <button class="btn btn-danger" (click)="confirmDelete()">🗑 Löschen</button>
+                }
+            </div>
+        </div>
+
+        @if (deleteConfirm) {
+            <div class="alert alert-danger confirm-bar">
+                <span>Ablesung vom <strong>{{ reading.dateOfReading }}</strong> wirklich löschen?</span>
+                <div class="confirm-actions">
+                    <button class="btn btn-danger btn-sm" (click)="doDelete()">Ja, löschen</button>
+                    <button class="btn btn-ghost btn-sm" (click)="cancelDelete()">Abbrechen</button>
+                </div>
+            </div>
+        }
+
+        <div class="detail-grid">
+
+            <!-- Main info card -->
+            <div class="card main-card">
+                <!-- Meter type header -->
+                <div class="meter-header" [class]="getMeterClass(reading.kindOfMeter)">
+                    <div class="meter-icon-wrap">
+                        <span class="meter-dot lg" [class]="getMeterClass(reading.kindOfMeter)"></span>
+                    </div>
+                    <div>
+                        <h2>{{ kindLabels[reading.kindOfMeter] }}-Ablesung</h2>
+                        <p class="meta-date">{{ reading.dateOfReading }}</p>
+                    </div>
+                    @if (reading.substitute) {
+                        <span class="badge badge-warning ml-auto">Schätzwert</span>
+                    }
+                </div>
+
+                <hr class="divider">
+
+                <div class="info-grid">
+                    <div class="info-block">
+                        <span class="label">Zählerstand</span>
+                        <span class="value big mono">
+              {{ formatNumber(reading.meterCount) }}
+                            <small>{{ kindUnits[reading.kindOfMeter] }}</small>
+            </span>
+                    </div>
+                    <div class="info-block">
+                        <span class="label">Zähler-ID</span>
+                        <span class="value mono">{{ reading.meterId }}</span>
+                    </div>
+                    <div class="info-block">
+                        <span class="label">Zählerart</span>
+                        <span class="value">
+              <span class="badge" [class]="'badge-' + getMeterClass(reading.kindOfMeter)">
+                <span class="meter-dot" [class]="getMeterClass(reading.kindOfMeter)"></span>
+                  {{ kindLabels[reading.kindOfMeter] }}
+              </span>
+            </span>
+                    </div>
+                    <div class="info-block">
+                        <span class="label">Schätzwert</span>
+                        <span class="value">
+              @if (reading.substitute) {
+                  <span class="badge badge-warning">Ja – kein tatsächlicher Zählerstand</span>
+              } @else {
+                  <span class="text-secondary">Nein</span>
+              }
+            </span>
+                    </div>
+                    @if (reading.comment) {
+                        <div class="info-block full-span">
+                            <span class="label">Kommentar</span>
+                            <span class="value">{{ reading.comment }}</span>
+                        </div>
+                    }
+                    <div class="info-block full-span">
+                        <span class="label">Ablesung-ID</span>
+                        <span class="value mono small text-muted">{{ reading.id }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer card -->
+            <div class="card customer-card">
+                <div class="card-header">
+                    <h2>Kunde</h2>
+                </div>
+
+                @if (reading.customer) {
+                    <div class="customer-block">
+                        <div class="avatar large">{{ getCustomerInitials() }}</div>
+                        <div class="customer-info">
+                            <span class="customer-name">{{ getCustomerName() }}</span>
+                            <span class="customer-id mono small text-muted">{{ reading.customer.id }}</span>
+                        </div>
+                    </div>
+                    <a [routerLink]="['/kunden', reading.customer.id]" class="btn btn-secondary full-width mt-12">
+                        Kundenprofil öffnen →
+                    </a>
+                } @else {
+                    <div class="empty-state">
+                        <span class="icon">👤</span>
+                        <p>Kunde wurde gelöscht. Ablesung bleibt gespeichert.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

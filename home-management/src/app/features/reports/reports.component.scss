@@ -1,0 +1,151 @@
+.reports-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 960px) { grid-template-columns: 1fr; }
+}
+
+.full-span { grid-column: 1 / -1; }
+
+.section-desc {
+  font-size: 13px; color: var(--text-secondary);
+  margin-bottom: 20px; line-height: 1.5;
+}
+
+// Export table
+.export-table {
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.export-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 80px);
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  &:hover { background: var(--surface-2); }
+
+  &.header-row {
+    font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .06em;
+    font-weight: 600; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    &:hover { background: transparent; }
+    span { text-align: center; &:first-child { text-align: left; } }
+  }
+}
+
+.type-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500;
+  .type-icon { font-size: 15px; }
+}
+
+.export-btn {
+  padding: 5px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; font-family: var(--font-mono);
+  transition: all .15s;
+  border: 1px solid transparent;
+  &.json { background: rgba(34,197,94,.1); color: var(--success); border-color: rgba(34,197,94,.2);
+    &:hover { background: rgba(34,197,94,.2); } }
+  &.csv  { background: rgba(59,130,246,.1); color: var(--accent); border-color: rgba(59,130,246,.2);
+    &:hover { background: rgba(59,130,246,.2); } }
+  &.xml  { background: rgba(245,158,11,.1); color: var(--strom); border-color: rgba(245,158,11,.2);
+    &:hover { background: rgba(245,158,11,.2); } }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+// Drop zone
+.drop-zone {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  margin-bottom: 16px;
+
+  &:hover, &.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+}
+
+.drop-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.drop-title { font-size: 14px; font-weight: 600; }
+.drop-sub   { font-size: 12px; color: var(--text-muted); }
+
+.hidden-input { display: none; }
+
+// Format chips
+.format-chips {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.format-chip {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  .chip-ext {
+    padding: 3px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+    background: rgba(239,68,68,.15); color: var(--heizung);
+    min-width: 42px; text-align: center;
+    &.xml  { background: rgba(245,158,11,.15); color: var(--strom); }
+    &.json { background: rgba(34,197,94,.15);  color: var(--success); }
+  }
+
+  .chip-info {
+    display: flex; flex-direction: column;
+    span { font-size: 13px; font-weight: 500; }
+    .chip-sub { font-size: 11px; color: var(--text-muted); }
+  }
+}
+
+// Dev card
+.dev-card {
+  border-color: rgba(239,68,68,.2);
+  background: rgba(239,68,68,.03);
+}
+
+.mono         { font-family: var(--font-mono); font-size: 12px; }
+.text-muted   { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+
+.badge-danger  { background: rgba(239,68,68,.15); color: var(--danger); }
+.badge-success { background: rgba(34,197,94,.15);  color: var(--success); }
+
+// Progress bar
+.progress-wrap {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: -8px 0 16px;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .2s ease;
+}
+
+.chip-ext.csv { background: rgba(59,130,246,.15); color: var(--accent); }
+.chip-ext.pdf { background: rgba(239,68,68,.15); color: var(--heizung); }

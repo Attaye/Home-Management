@@ -1,0 +1,159 @@
+<div class="fade-in">
+  <div class="page-header">
+    <div class="page-title">
+      <div class="breadcrumb">
+        Home › <a routerLink="/ablesungen">Ablesungen</a>
+        @if (isEdit) { › Ändern } @else { › Neu erstellen }
+      </div>
+      <h1>{{ isEdit ? 'Ablesung ändern' : 'Neue Ablesung erstellen' }}</h1>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert alert-danger">⚠ {{ error }}</div>
+  }
+
+  <div class="form-card card">
+    <div class="form-required-note">
+      Alle mit <span class="req-star">*</span> markierten Felder sind Pflichtfelder.
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+
+        <!-- Customer -->
+        <div class="form-group full-span">
+          <label for="customerId">Kunde *</label>
+          <select
+            id="customerId"
+            formControlName="customerId"
+            class="form-control"
+            [class.is-invalid]="isInvalid('customerId')"
+          >
+            <option value="">Kunden auswählen…</option>
+            @for (c of customers; track c.id) {
+              <option [value]="c.id">{{ getCustomerName(c) }}</option>
+            }
+          </select>
+          @if (isInvalid('customerId')) {
+            <span class="error-msg">Kunde ist erforderlich.</span>
+          }
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+          <label for="dateOfReading">Datum *</label>
+          <input
+            id="dateOfReading"
+            type="date"
+            formControlName="dateOfReading"
+            class="form-control"
+            [class.is-invalid]="isInvalid('dateOfReading')"
+          />
+          @if (isInvalid('dateOfReading')) {
+            <span class="error-msg">Datum ist erforderlich.</span>
+          }
+        </div>
+
+        <!-- Kind of Meter -->
+        <div class="form-group">
+          <label for="kindOfMeter">Zählerart *</label>
+          <select
+            id="kindOfMeter"
+            formControlName="kindOfMeter"
+            class="form-control"
+            [class.is-invalid]="isInvalid('kindOfMeter')"
+          >
+            <option value="">Art auswählen…</option>
+            <option value="STROM">⚡ Strom</option>
+            <option value="WASSER">💧 Wasser</option>
+            <option value="HEIZUNG">🔥 Heizung</option>
+            <option value="UNBEKANNT">❓ Unbekannt</option>
+          </select>
+          @if (isInvalid('kindOfMeter')) {
+            <span class="error-msg">Zählerart ist erforderlich.</span>
+          }
+        </div>
+
+        <!-- Meter ID -->
+        <div class="form-group">
+          <label for="meterId">Zähler-ID *</label>
+          <input
+            id="meterId"
+            formControlName="meterId"
+            class="form-control"
+            [class.is-invalid]="isInvalid('meterId')"
+            placeholder="z.B. MSN-12345"
+          />
+          @if (isInvalid('meterId')) {
+            <span class="error-msg">Zähler-ID ist erforderlich.</span>
+          }
+        </div>
+
+        <!-- Meter Count -->
+        <div class="form-group">
+          <label for="meterCount">Zählerstand *</label>
+          <input
+            id="meterCount"
+            type="number"
+            step="0.01"
+            min="0"
+            formControlName="meterCount"
+            class="form-control mono-input"
+            [class.is-invalid]="isInvalid('meterCount')"
+            placeholder="0.00"
+          />
+          @if (isInvalid('meterCount')) {
+            <span class="error-msg">Zählerstand ist erforderlich.</span>
+          }
+        </div>
+
+        <!-- Comment -->
+        <div class="form-group full-span">
+          <label for="comment">Kommentar <span class="optional">(optional)</span></label>
+          <input
+            id="comment"
+            formControlName="comment"
+            class="form-control"
+            placeholder="Optionaler Hinweis oder Bemerkung…"
+          />
+        </div>
+
+        <!-- Substitute toggle -->
+        <div class="form-group full-span">
+          <div class="checkbox-row">
+            <label class="toggle-label" for="substitute">
+              <input
+                id="substitute"
+                type="checkbox"
+                formControlName="substitute"
+                class="toggle-input"
+              />
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-text">
+                Schätzwert
+                <span class="toggle-hint">(kein tatsächlicher Zählerstand)</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving">
+          @if (saving) { <span class="spinner small"></span> }
+          {{ isEdit ? 'Änderung speichern' : 'Ablesung speichern' }}
+        </button>
+        <a routerLink="/ablesungen" class="btn btn-secondary">Abbrechen</a>
+        @if (isEdit) {
+          <button type="button" class="btn btn-danger ml-auto" disabled title="Nur über Detailansicht">
+            🗑 Löschen
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>

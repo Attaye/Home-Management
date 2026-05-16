@@ -1,0 +1,133 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Dashboard</h1>
+            <div class="breadcrumb">Übersicht · Digitale Hausverwaltung</div>
+        </div>
+        <div class="page-actions">
+            <!-- ✅ NEU: + Neuer Kunde nur für USER und ADMIN -->
+            @if (authService.canWrite()) {
+                <a routerLink="/kunden/neu" class="btn btn-primary">+ Neuer Kunde</a>
+            }
+        </div>
+    </div>
+
+    @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+    }
+
+    @if (loading) {
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <span>Daten werden geladen…</span>
+        </div>
+    }
+
+    @if (!loading && !error) {
+        <!-- Stats -->
+        <div class="stats-grid">
+            @for (s of stats; track s.label) {
+                <div class="stat-card">
+                    <div class="stat-icon" [style.background]="s.color + '22'" [style.color]="s.color">
+                        {{ s.icon }}
+                    </div>
+                    <div class="stat-body">
+                        <span class="stat-value">{{ s.value }}</span>
+                        <span class="stat-label">{{ s.label }}</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="dash-grid">
+            <!-- Letzte Ablesungen -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Letzte Ablesungen</h2>
+                    <a routerLink="/ablesungen" class="btn btn-ghost btn-sm">Alle anzeigen →</a>
+                </div>
+                @if (recentReadings.length === 0) {
+                    <div class="empty-state">
+                        <span class="icon">📊</span>
+                        <p>Noch keine Ablesungen vorhanden.</p>
+                    </div>
+                } @else {
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Kunde</th>
+                                <th>Art</th>
+                                <th>Zählerstand</th>
+                                <th>Schätzung</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @for (r of recentReadings; track r.id) {
+                                    <tr [routerLink]="['/ablesungen', r.id]" style="cursor:pointer">
+                                        <td><span class="mono">{{ r.dateOfReading }}</span></td>
+                                        <td>
+                                            @if (r.customer && r.customer.firstName) {
+                                                <div class="customer-cell">
+                                                    <div class="avatar small">{{ getReadingInitials(r) }}</div>
+                                                    <span>{{ getCustomerName(r) }}</span>
+                                                </div>
+                                            } @else {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        <td>
+                      <span class="badge" [class]="'badge-' + getMeterClass(r.kindOfMeter)">
+                        <span class="meter-dot" [class]="getMeterClass(r.kindOfMeter)"></span>
+                          {{ kindLabels[r.kindOfMeter] }}
+                      </span>
+                                        </td>
+                                        <td class="mono">{{ formatNumber(r.meterCount) }} {{ kindUnits[r.kindOfMeter] }}</td>
+                                        <td>
+                                            @if (r.substitute) {
+                                                <span class="badge badge-warning">Ja</span>
+                                            } @else {
+                                                <span class="text-muted">Nein</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <!-- Ablesungen je Kunde -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Ablesungen je Kunde</h2>
+                    <a routerLink="/kunden" class="btn btn-ghost btn-sm">Alle Kunden →</a>
+                </div>
+                @if (customerStats.length === 0) {
+                    <div class="empty-state">
+                        <span class="icon">👥</span>
+                        <p>Noch keine Kunden vorhanden.</p>
+                    </div>
+                } @else {
+                    <ul class="customer-stat-list">
+                        @for (cs of customerStats; track cs.customer.id) {
+                            <li [routerLink]="['/kunden', cs.customer.id]" style="cursor:pointer">
+                                <div class="avatar">{{ getInitials(cs.customer) }}</div>
+                                <span class="cs-name">{{ getFullName(cs.customer) }}</span>
+                                <div class="cs-bar-wrap">
+                                    <div class="cs-bar"
+                                         [style.width.%]="customerStats[0].count > 0
+                      ? (cs.count / customerStats[0].count * 100) : 0">
+                                    </div>
+                                </div>
+                                <span class="cs-count mono">{{ cs.count }}</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+</div>

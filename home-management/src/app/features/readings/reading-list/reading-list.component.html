@@ -1,0 +1,133 @@
+<div class="fade-in">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Ablesungen</h1>
+            <div class="breadcrumb">Home › Ablesungen</div>
+        </div>
+        <div class="page-actions">
+            <!-- ✅ NEU: + Erstellen nur für USER und ADMIN sichtbar -->
+            @if (authService.canWrite()) {
+                <a routerLink="/ablesungen/neu" class="btn btn-primary">+ Ablesung erstellen</a>
+            }
+        </div>
+    </div>
+
+    @if (error) {
+        <div class="alert alert-danger">⚠ {{ error }}</div>
+    }
+
+    <div class="card">
+        <!-- Filter bar -->
+        <div class="filter-bar">
+            <!-- Kind tabs -->
+            <div class="kind-tabs">
+                @for (k of kinds; track k.value) {
+                    <button
+                            class="kind-tab"
+                            [class.active]="filterKind === k.value"
+                            (click)="filterKind = k.value; load()"
+                    >
+                        @if (k.value) {
+                            <span class="meter-dot" [class]="k.value.toLowerCase()"></span>
+                        }
+                        {{ k.label }}
+                    </button>
+                }
+            </div>
+
+            <!-- Date range -->
+            <div class="date-filters">
+                <div class="date-field">
+                    <label>Von</label>
+                    <input type="date" class="form-control compact" [(ngModel)]="filterStart" (change)="load()" />
+                </div>
+                <div class="date-field">
+                    <label>Bis</label>
+                    <input type="date" class="form-control compact" [(ngModel)]="filterEnd" (change)="load()" />
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input
+                        class="form-control search-input"
+                        type="search"
+                        placeholder="Nach Name suchen…"
+                        [(ngModel)]="searchQuery"
+                />
+            </div>
+        </div>
+
+        @if (loading) {
+            <div class="loading-overlay"><div class="spinner"></div><span>Lade Ablesungen…</span></div>
+        } @else if (filtered.length === 0) {
+            <div class="empty-state">
+                <span class="icon">📊</span>
+                <p>Keine Ablesungen gefunden.</p>
+            </div>
+        } @else {
+            <div class="table-meta">{{ filtered.length }} Einträge</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Kunde</th>
+                        <th>Art</th>
+                        <th>Zähler-ID</th>
+                        <th>Zählerstand</th>
+                        <th>Schätzung</th>
+                        <th>Kommentar</th>
+                        <th>Aktionen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @for (r of filtered; track r.id) {
+                            <tr>
+                                <td class="mono">{{ r.dateOfReading }}</td>
+                                <td>
+                                    @if (r.customer) {
+                                        <div class="customer-cell">
+                                            <div class="avatar small">{{ getInitials(r) }}</div>
+                                            <a [routerLink]="['/kunden', r.customer.id]" class="customer-link">
+                                                {{ getCustomerName(r) }}
+                                            </a>
+                                        </div>
+                                    } @else {
+                                        <span class="text-muted">Gelöschter Kunde</span>
+                                    }
+                                </td>
+                                <td>
+                  <span class="badge" [class]="'badge-' + getMeterClass(r.kindOfMeter)">
+                    <span class="meter-dot" [class]="getMeterClass(r.kindOfMeter)"></span>
+                      {{ kindLabels[r.kindOfMeter] }}
+                  </span>
+                                </td>
+                                <td class="mono text-secondary">{{ r.meterId }}</td>
+                                <td class="mono">{{ formatNumber(r.meterCount) }} {{ kindUnits[r.kindOfMeter] }}</td>
+                                <td>
+                                    @if (r.substitute) {
+                                        <span class="badge badge-warning">Ja</span>
+                                    } @else {
+                                        <span class="text-muted">Nein</span>
+                                    }
+                                </td>
+                                <td class="text-secondary comment-cell">{{ r.comment ?? '—' }}</td>
+                                <td>
+                                    <div class="action-row">
+                                        <a [routerLink]="['/ablesungen', r.id]" class="btn btn-ghost btn-sm">Ansicht</a>
+                                        <!-- ✅ NEU: Ändern-Button nur für USER und ADMIN -->
+                                        @if (authService.canWrite()) {
+                                            <a [routerLink]="['/ablesungen', r.id, 'bearbeiten']" class="btn btn-secondary btn-sm">Ändern</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

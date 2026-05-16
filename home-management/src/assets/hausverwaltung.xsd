@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
+
+    <!-- ══ Root Element ══════════════════════════════════════════════════════ -->
+    <xs:element name="export">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="customers" type="CustomersType" minOccurs="0"/>
+                <xs:element name="readings"  type="ReadingsType"  minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- ══ Customers ═════════════════════════════════════════════════════════ -->
+    <xs:complexType name="CustomersType">
+        <xs:sequence>
+            <xs:element name="customer" type="CustomerType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CustomerType">
+        <xs:sequence>
+            <xs:element name="id"        type="UuidType"/>
+            <xs:element name="firstName" type="xs:string"/>
+            <xs:element name="lastName"  type="xs:string"/>
+            <xs:element name="gender"    type="GenderType"/>
+            <xs:element name="birthDate" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ══ Readings ══════════════════════════════════════════════════════════ -->
+    <xs:complexType name="ReadingsType">
+        <xs:sequence>
+            <xs:element name="reading" type="ReadingType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ReadingType">
+        <xs:sequence>
+            <xs:element name="id"             type="UuidType"/>
+            <xs:element name="customerId"     type="xs:string"/>
+            <xs:element name="dateOfReading"  type="xs:date"/>
+            <xs:element name="kindOfMeter"    type="KindOfMeterType"/>
+            <xs:element name="meterCount"     type="xs:decimal"/>
+            <xs:element name="meterId"        type="xs:string"/>
+            <xs:element name="substitute"     type="xs:boolean"/>
+            <xs:element name="comment"        type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ══ Simple Types ══════════════════════════════════════════════════════ -->
+    <xs:simpleType name="UuidType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="GenderType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="M"/>
+            <xs:enumeration value="W"/>
+            <xs:enumeration value="D"/>
+            <xs:enumeration value="U"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="KindOfMeterType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="STROM"/>
+            <xs:enumeration value="WASSER"/>
+            <xs:enumeration value="HEIZUNG"/>
+            <xs:enumeration value="UNBEKANNT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
